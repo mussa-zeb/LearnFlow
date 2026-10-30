@@ -22,6 +22,11 @@ const Home = () => {
     fetchCourses();
   }, []);
 
+  const scrollToFeatured = () => {
+    const el = document.getElementById("featured");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <>
       <section className="relative w-full overflow-hidden bg-white">
@@ -30,7 +35,6 @@ const Home = () => {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32">
           <div className="text-center max-w-3xl mx-auto">
-            
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-neutral-900 leading-tight mb-6">
               Learn without limits,
               <br className="hidden sm:block" />
@@ -48,18 +52,22 @@ const Home = () => {
                 Browse all courses
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
-              <Link
-                to="/courses"
+              <button
+                type="button"
+                onClick={scrollToFeatured}
                 className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-200 hover:bg-neutral-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2 focus:ring-offset-white"
               >
                 View featured
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="w-full bg-white py-16 sm:py-20">
+      <section
+        id="featured"
+        className="w-full bg-white py-16 sm:py-20 scroll-mt-20"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
             <div>

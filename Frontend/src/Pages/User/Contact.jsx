@@ -1,6 +1,32 @@
-import { Mail, MessageSquare, MapPin } from "lucide-react";
+import { useState } from "react";
+import { Mail, MessageSquare, MapPin, CheckCircle, AlertCircle } from "lucide-react";
 
 const Contact = () => {
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setError("Please fill in all fields before sending.");
+      return;
+    }
+
+    // Demo: no backend endpoint exists yet. Show confirmation.
+    // To wire it up later, POST `form` to e.g. /api/contact here.
+    setSubmitted(true);
+    setForm({ name: "", email: "", message: "" });
+    setTimeout(() => setSubmitted(false), 4000);
+  };
+
   return (
     <>
       <div className="w-full bg-white border-b border-neutral-100">
@@ -49,41 +75,79 @@ const Contact = () => {
           </div>
 
           <div className="mt-12 max-w-2xl mx-auto">
-            <form className="space-y-6 rounded-3xl border border-neutral-100 bg-white p-6 sm:p-8 shadow-sm">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6 rounded-3xl border border-neutral-100 bg-white p-6 sm:p-8 shadow-sm"
+            >
+              {error && (
+                <div className="flex items-start gap-2 rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-red-100">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {submitted && (
+                <div className="flex items-start gap-2 rounded-xl bg-green-50 px-3 py-2.5 text-sm text-green-700 ring-1 ring-green-100">
+                  <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>Thanks! Your message has been received (demo).</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-900 mb-2">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-neutral-900 mb-2"
+                  >
                     Name
                   </label>
                   <input
+                    id="name"
+                    name="name"
                     type="text"
+                    value={form.name}
+                    onChange={handleChange}
                     className="block w-full rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100"
                     placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-900 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-neutral-900 mb-2"
+                  >
                     Email
                   </label>
                   <input
+                    id="email"
+                    name="email"
                     type="email"
+                    value={form.email}
+                    onChange={handleChange}
                     className="block w-full rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100"
                     placeholder="you@example.com"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-900 mb-2">
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-medium text-neutral-900 mb-2"
+                >
                   Message
                 </label>
                 <textarea
+                  id="message"
+                  name="message"
                   rows={5}
+                  value={form.message}
+                  onChange={handleChange}
                   className="block w-full rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100 resize-none"
                   placeholder="Tell us how we can help..."
                 />
               </div>
               <button
-                type="button"
+                type="submit"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-neutral-800 hover:shadow-md"
               >
                 Send message

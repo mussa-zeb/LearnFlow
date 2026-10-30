@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Home } from "lucide-react";
 
 const NotFound = () => {
+  const navigate = useNavigate();
   return (
     <div className="flex min-h-[calc(100vh-16rem)] items-center justify-center bg-white px-4 py-12">
       <div className="text-center max-w-md mx-auto">
@@ -25,7 +26,9 @@ const NotFound = () => {
             Go home
           </Link>
           <button
-            onClick={() => window.history.back()}
+            onClick={() =>
+    window.history.length > 1 ? window.history.back() : navigate("/")
+  }
             className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-5 py-2.5 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-200 hover:bg-neutral-50"
           >
             <ArrowLeft className="h-4 w-4" />

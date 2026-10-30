@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { coursesApi, resolveMediaUrl } from "../../utils/api";
 import { Plus, Pencil, Trash2, BookOpen, Search, ListVideo } from "lucide-react";
@@ -11,12 +11,15 @@ const AdminCourses = () => {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // "all" | "published" | "draft"
+  const statusFilter = searchParams.get("status") || "all";
 
   const fetchCourses = async () => {
     try {
       const { data } = await coursesApi.getAllAdmin(token);
       setCourses(data);
-      setFilteredCourses(data);
     } catch (error) {
       console.error("Error fetching courses:", error);
     } finally {
@@ -31,20 +34,40 @@ const AdminCourses = () => {
   }, [token]);
 
   useEffect(() => {
+    let result = courses;
+
+    if (statusFilter === "published") {
+      result = result.filter((c) => c.isPublished);
+    } else if (statusFilter === "draft") {
+      result = result.filter((c) => !c.isPublished);
+    }
+
     if (searchTerm) {
-      const result = courses.filter(
+      result = result.filter(
         (course) =>
           course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           course.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredCourses(result);
-    } else {
-      setFilteredCourses(courses);
     }
-  }, [searchTerm, courses]);
+
+    setFilteredCourses(result);
+  }, [searchTerm, courses, statusFilter]);
+
+  const setStatus = (status) => {
+    if (status === "all") {
+      searchParams.delete("status");
+    } else {
+      searchParams.set("status", status);
+    }
+    setSearchParams(searchParams);
+  };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this course? This will also delete all its videos.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this course? This will also delete all its videos."
+      )
+    ) {
       setDeleteLoading(id);
       try {
         await coursesApi.delete(id, token);
@@ -84,8 +107,8 @@ const AdminCourses = () => {
 
       <div className="w-full py-8">
         <div className="px-4 sm:px-6 lg:px-8">
-          <div className="mb-6">
-            <div className="relative w-full sm:max-w-md">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div className="relative w-full lg:max-w-md">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search className="h-4 w-4 text-neutral-400" />
               </div>
@@ -96,6 +119,22 @@ const AdminCourses = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full rounded-xl border border-neutral-200 bg-white py-2.5 pl-9 pr-3 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100"
               />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {["all", "published", "draft"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setStatus(s)}
+                  className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+                    statusFilter === s
+                      ? "bg-neutral-900 text-white shadow-sm"
+                      : "bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50"
+                  }`}
+                >
+                  {s === "all" ? "All" : s === "published" ? "Published" : "Drafts"}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -185,8 +224,6 @@ const AdminCourses = () => {
                         </td>
                         <td className="px-4 sm:px-6 py-4 text-right">
                           <div className="flex flex-wrap items-center justify-end gap-2">
-                            
-                            {/* Curriculum Button */}
                             <Link
                               to={`/admin/courses/${course._id}/lessons`}
                               className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-700 border border-blue-100 bg-blue-50 hover:bg-blue-100"
@@ -196,7 +233,6 @@ const AdminCourses = () => {
                               Curriculum
                             </Link>
 
-                            {/* Edit Button */}
                             <Link
                               to={`/admin/courses/edit/${course._id}`}
                               className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-neutral-700 border border-neutral-200 bg-white hover:bg-neutral-50"
@@ -205,7 +241,6 @@ const AdminCourses = () => {
                               Edit
                             </Link>
 
-                            {/* Delete Button */}
                             <button
                               onClick={() => handleDelete(course._id)}
                               disabled={deleteLoading === course._id}
@@ -214,7 +249,6 @@ const AdminCourses = () => {
                               <Trash2 className="h-3 w-3" />
                               {deleteLoading === course._id ? "..." : "Delete"}
                             </button>
-
                           </div>
                         </td>
                       </tr>
@@ -232,11 +266,11 @@ const AdminCourses = () => {
                 No courses found
               </h3>
               <p className="text-neutral-600 mb-6 max-w-sm">
-                {searchTerm
-                  ? "Try a different search term."
+                {searchTerm || statusFilter !== "all"
+                  ? "Try a different search term or filter."
                   : "Get started by creating your first course."}
               </p>
-              {!searchTerm && (
+              {!searchTerm && statusFilter === "all" && (
                 <Link
                   to="/admin/courses/new"
                   className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"

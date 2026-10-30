@@ -41,24 +41,28 @@ const AdminDashboard = () => {
       value: totalCourses,
       icon: BookOpen,
       color: "bg-neutral-900/5 text-neutral-900",
+      link: "/admin/courses",
     },
     {
       name: "Published",
       value: publishedCourses,
       icon: Eye,
       color: "bg-green-50 text-green-700",
+      link: "/admin/courses?status=published",
     },
     {
       name: "Drafts",
       value: draftCourses,
       icon: FileText,
       color: "bg-amber-50 text-amber-700",
+      link: "/admin/courses?status=draft",
     },
     {
       name: "Total Hours",
       value: totalHours,
       icon: Clock,
       color: "bg-blue-50 text-blue-700",
+      link: "/admin/courses",
     },
   ];
 
@@ -90,9 +94,10 @@ const AdminDashboard = () => {
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {stats.map((stat) => (
-              <div
+              <Link
                 key={stat.name}
-                className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm"
+                to={stat.link}
+                className="block rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -109,7 +114,7 @@ const AdminDashboard = () => {
                     <stat.icon className="h-5 w-5" />
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

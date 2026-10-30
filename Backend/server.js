@@ -2,6 +2,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import dns from "node:dns";
 
 import connectDB from "./config/db.js";
 import courseRoutes from "./routes/courseRoutes.js";
@@ -9,6 +10,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import seedAdmin from "./utils/seedAdmin.js";
 
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 dotenv.config();
 
 const app = express();
