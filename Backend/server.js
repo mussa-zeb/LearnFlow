@@ -4,11 +4,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import dns from "node:dns";
 
-import connectDB from "./config/db.js";
-import courseRoutes from "./routes/courseRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import uploadRoutes from "./routes/uploadRoutes.js";
-import seedAdmin from "./utils/seedAdmin.js";
+import connectDB from "./shared/config/db.js";
+import courseRoutes from "./modules/routes/courseRoutes.js";
+import adminRoutes from "./modules/routes/adminRoutes.js";
+import uploadRoutes from "./modules/routes/uploadRoutes.js";
+import seedAdmin from "./shared/utils/seedAdmin.js";
+import roadmapRoutes from "./modules/routes/roadmapRoutes.js";
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 dotenv.config();
@@ -73,6 +74,7 @@ app.use("/api", async (req, res, next) => {
 app.use("/api/courses", courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/roadmaps", roadmapRoutes);
 
 // Not found
 app.use((req, res) => {
