@@ -27,6 +27,7 @@ import CourseForm from "./Modules/Admin/CourseForm";
 import AdminCourseLessons from "./Modules/Admin/AdminCourseLessons"; 
 import AdminRoadmaps from "./Modules/Admin/AdminRoadmaps"; 
 import RoadmapForm from "./Modules/Admin/RoadmapForm"; 
+import AdminCategories from "./Modules/Admin/AdminCategories";
 
 import { AdminAuthProvider, useAdminAuth } from "./Shared/context/AdminAuthContext";
 import UserLayout from "./Shared/components/UserLayout";
@@ -88,6 +89,15 @@ function AppRoutes() {
         }
       />
       
+        <Route
+  path="/admin/categories"
+  element={
+    <AdminRoute>
+      <AdminCategories />
+    </AdminRoute>
+  }
+/>
+
       <Route
         path="/admin/courses"
         element={

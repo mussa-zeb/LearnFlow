@@ -122,7 +122,12 @@ const Learn = () => {
           </div>
           <div className="hidden sm:flex items-center gap-4 text-neutral-600">
             <div className="flex items-center gap-1.5"><Clock className="h-4 w-4" /><span className="text-sm">{course.duration}</span></div>
-            <div className="flex items-center gap-1.5"><BookOpen className="h-4 w-4" /><span className="text-sm">{course.category}</span></div>
+            <div className="flex items-center gap-1.5">
+  <BookOpen className="h-4 w-4" />
+  <span className="text-sm">
+    {(course.categories || []).map((c) => c.name).join(" · ") || "Uncategorized"}
+  </span>
+</div>
           </div>
         </div>
       </div>

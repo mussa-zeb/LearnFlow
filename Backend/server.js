@@ -10,6 +10,8 @@ import adminRoutes from "./modules/routes/adminRoutes.js";
 import uploadRoutes from "./modules/routes/uploadRoutes.js";
 import seedAdmin from "./shared/utils/seedAdmin.js";
 import roadmapRoutes from "./modules/routes/roadmapRoutes.js";
+import categoryRoutes from "./modules/routes/categoryRoutes.js";
+
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 dotenv.config();
@@ -75,6 +77,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Not found
 app.use((req, res) => {

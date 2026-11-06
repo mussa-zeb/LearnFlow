@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAdminAuth } from "../../Shared/context/AdminAuthContext";
 import { coursesApi, resolveMediaUrl } from "../../Shared/utils/api";
-import { Plus, Pencil, Trash2, BookOpen, Search, ListVideo } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  BookOpen,
+  Search,
+  ListVideo,
+} from "lucide-react";
 
 const AdminCourses = () => {
   const { token } = useAdminAuth();
@@ -43,10 +50,13 @@ const AdminCourses = () => {
     }
 
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       result = result.filter(
         (course) =>
-          course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.category.toLowerCase().includes(searchTerm.toLowerCase())
+          course.title.toLowerCase().includes(term) ||
+          (course.categories || []).some((c) =>
+            (c.name || "").toLowerCase().includes(term)
+          )
       );
     }
 
@@ -132,7 +142,11 @@ const AdminCourses = () => {
                       : "bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50"
                   }`}
                 >
-                  {s === "all" ? "All" : s === "published" ? "Published" : "Drafts"}
+                  {s === "all"
+                    ? "All"
+                    : s === "published"
+                    ? "Published"
+                    : "Drafts"}
                 </button>
               ))}
             </div>
@@ -160,7 +174,7 @@ const AdminCourses = () => {
                         Course
                       </th>
                       <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider hidden md:table-cell">
-                        Category
+                        Categories
                       </th>
                       <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider hidden lg:table-cell">
                         Videos
@@ -202,9 +216,22 @@ const AdminCourses = () => {
                           </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
-                          <span className="inline-flex items-center rounded-full bg-neutral-50 px-2 py-0.5 text-xs font-medium text-neutral-700 ring-1 ring-neutral-100">
-                            {course.category}
-                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {(course.categories || []).length === 0 ? (
+                              <span className="text-xs text-neutral-400">
+                                —
+                              </span>
+                            ) : (
+                              course.categories.map((c) => (
+                                <span
+                                  key={c._id || c}
+                                  className="inline-flex items-center rounded-full bg-neutral-50 px-2 py-0.5 text-xs font-medium text-neutral-700 ring-1 ring-neutral-100"
+                                >
+                                  {c.name || "Unnamed"}
+                                </span>
+                              ))
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
                           <span className="text-sm text-neutral-600">

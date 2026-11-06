@@ -1,62 +1,82 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { coursesApi } from "../../Shared/utils/api";
+import { coursesApi, categoriesApi } from "../../Shared/utils/api";
 import CourseCard from "../../Shared/components/CourseCard";
 import { BookOpen, Search } from "lucide-react";
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-    const [searchParams] = useSearchParams();
+
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
+  const initialCategory = searchParams.get("category") || "all";
+
   const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
-  
   useEffect(() => {
-    const query = searchParams.get("search") || "";
-    setSearchTerm(query);
+    setSearchTerm(searchParams.get("search") || "");
+    setSelectedCategory(searchParams.get("category") || "all");
   }, [searchParams]);
-  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await coursesApi.getAll();
-        setCourses(data);
-        setFilteredCourses(data);
+        const [coursesRes, categoriesRes] = await Promise.all([
+          coursesApi.getAll(),
+          categoriesApi.getAll(),
+        ]);
+        setCourses(coursesRes.data);
+        setCategories(categoriesRes.data);
       } catch (error) {
-        console.error("Error fetching courses:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCourses();
+    fetchData();
   }, []);
 
   useEffect(() => {
     let result = courses;
 
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       result = result.filter(
         (course) =>
-          course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.category.toLowerCase().includes(searchTerm.toLowerCase())
+          course.title.toLowerCase().includes(term) ||
+          course.description.toLowerCase().includes(term) ||
+          (course.categories || []).some((c) =>
+            (c.name || "").toLowerCase().includes(term)
+          )
       );
     }
 
     if (selectedCategory !== "all") {
-      result = result.filter((course) => course.category === selectedCategory);
+      result = result.filter((course) =>
+        (course.categories || []).some((c) => (c._id || c) === selectedCategory)
+      );
     }
 
     setFilteredCourses(result);
   }, [searchTerm, selectedCategory, courses]);
 
-  const categories = [
-    "all",
-    ...new Set(courses.map((course) => course.category)),
-  ];
+  const updateSearch = (value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set("search", value);
+    else params.delete("search");
+    setSearchParams(params);
+  };
+
+  const updateCategory = (id) => {
+    const params = new URLSearchParams(searchParams);
+    if (id === "all") params.delete("category");
+    else params.set("category", id);
+    setSearchParams(params);
+  };
 
   return (
     <>
@@ -85,23 +105,33 @@ const Courses = () => {
                 type="text"
                 placeholder="Search courses..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-xl border border-neutral-200 bg-white py-2.5 pl-9 pr-3 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100 transition-all duration-150"
+                onChange={(e) => updateSearch(e.target.value)}
+                className="block w-full rounded-xl border border-neutral-200 bg-white py-2.5 pl-9 pr-3 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-100"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {categories.map((category) => (
+              <button
+                onClick={() => updateCategory("all")}
+                className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+                  selectedCategory === "all"
+                    ? "bg-neutral-900 text-white shadow-sm"
+                    : "bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50"
+                }`}
+              >
+                All
+              </button>
+              {categories.map((cat) => (
                 <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
+                  key={cat._id}
+                  onClick={() => updateCategory(cat._id)}
                   className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
-                    selectedCategory === category
+                    selectedCategory === cat._id
                       ? "bg-neutral-900 text-white shadow-sm"
                       : "bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50"
                   }`}
                 >
-                  {category === "all" ? "All" : category}
+                  {cat.name}
                 </button>
               ))}
             </div>
@@ -119,10 +149,6 @@ const Courses = () => {
                     <div className="h-5 bg-neutral-100 rounded-md w-3/4" />
                     <div className="h-4 bg-neutral-100 rounded-md w-full" />
                     <div className="h-4 bg-neutral-100 rounded-md w-5/6" />
-                    <div className="pt-4 border-t border-neutral-50 flex justify-between">
-                      <div className="h-4 bg-neutral-100 rounded-md w-20" />
-                      <div className="h-4 bg-neutral-100 rounded-md w-16" />
-                    </div>
                   </div>
                 </div>
               ))}

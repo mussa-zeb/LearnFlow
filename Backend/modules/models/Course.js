@@ -12,11 +12,12 @@ const courseSchema = new mongoose.Schema(
       required: [true, "Course description is required"],
       trim: true,
     },
-    category: {
-      type: String,
-      required: [true, "Course category is required"],
-      trim: true,
-    },
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    ],
     duration: {
       type: String,
       required: [true, "Course duration is required"],
@@ -27,41 +28,22 @@ const courseSchema = new mongoose.Schema(
       required: [true, "Duration in minutes is required"],
       min: 1,
     },
-    thumbnail: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-    previewVideoUrl: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-    // 🔥 NEW: Array of lessons
+    thumbnail: { type: String, trim: true, default: "" },
+    previewVideoUrl: { type: String, trim: true, default: "" },
     lessons: [
       {
         title: { type: String, required: true },
         videoUrl: { type: String, required: true },
       },
     ],
-    // Keep videoUrl for backwards compatibility
-    videoUrl: {
-      type: String,
-      trim: true,
-      default: "",
-    },
+    videoUrl: { type: String, trim: true, default: "" },
     content: {
       type: String,
       required: [true, "Course content is required"],
     },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
+    isPublished: { type: Boolean, default: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Course = mongoose.model("Course", courseSchema);

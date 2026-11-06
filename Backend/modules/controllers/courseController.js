@@ -1,29 +1,30 @@
 import Course from "../models/Course.js";
 
-
 export const getCourses = async (req, res) => {
   try {
-    const courses = await Course.find({ isPublished: true }).sort({ createdAt: -1 });
+    const courses = await Course.find({ isPublished: true })
+      .populate("categories")
+      .sort({ createdAt: -1 });
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find({}).sort({ createdAt: -1 });
+    const courses = await Course.find({})
+      .populate("categories")
+      .sort({ createdAt: -1 });
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
-
 export const getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await Course.findById(req.params.id).populate("categories");
     if (course) {
       res.json(course);
     } else {
@@ -34,41 +35,58 @@ export const getCourseById = async (req, res) => {
   }
 };
 
-
 export const createCourse = async (req, res) => {
   try {
     const {
-      title, description, category, duration, durationMinutes,
-      thumbnail, previewVideoUrl, videoUrl, lessons, content, isPublished,
+      title,
+      description,
+      categories,
+      duration,
+      durationMinutes,
+      thumbnail,
+      previewVideoUrl,
+      videoUrl,
+      lessons,
+      content,
+      isPublished,
     } = req.body;
 
     const course = new Course({
       title,
       description,
-      category,
+      categories: Array.isArray(categories) ? categories : [],
       duration,
       durationMinutes: Number(durationMinutes),
       thumbnail: thumbnail || "",
       previewVideoUrl: previewVideoUrl || "",
       videoUrl: videoUrl || "",
-      lessons: lessons || [], 
+      lessons: lessons || [],
       content,
       isPublished,
     });
 
-    const createdCourse = await course.save();
-    res.status(201).json(createdCourse);
+    const created = await course.save();
+    const populated = await Course.findById(created._id).populate("categories");
+    res.status(201).json(populated);
   } catch (error) {
     res.status(400).json({ message: "Invalid course data", error: error.message });
   }
 };
 
-
 export const updateCourse = async (req, res) => {
   try {
     const {
-      title, description, category, duration, durationMinutes,
-      thumbnail, previewVideoUrl, videoUrl, lessons, content, isPublished,
+      title,
+      description,
+      categories,
+      duration,
+      durationMinutes,
+      thumbnail,
+      previewVideoUrl,
+      videoUrl,
+      lessons,
+      content,
+      isPublished,
     } = req.body;
 
     const course = await Course.findById(req.params.id);
@@ -76,18 +94,23 @@ export const updateCourse = async (req, res) => {
     if (course) {
       course.title = title || course.title;
       course.description = description || course.description;
-      course.category = category || course.category;
+      if (categories !== undefined) {
+        course.categories = Array.isArray(categories) ? categories : [];
+      }
       course.duration = duration || course.duration;
       course.durationMinutes = Number(durationMinutes) || course.durationMinutes;
       course.thumbnail = thumbnail !== undefined ? thumbnail : course.thumbnail;
-      course.previewVideoUrl = previewVideoUrl !== undefined ? previewVideoUrl : course.previewVideoUrl;
+      course.previewVideoUrl =
+        previewVideoUrl !== undefined ? previewVideoUrl : course.previewVideoUrl;
       course.videoUrl = videoUrl !== undefined ? videoUrl : course.videoUrl;
-      course.lessons = lessons !== undefined ? lessons : course.lessons; // 🔥 Handle lessons
+      course.lessons = lessons !== undefined ? lessons : course.lessons;
       course.content = content || course.content;
-      course.isPublished = isPublished !== undefined ? isPublished : course.isPublished;
+      course.isPublished =
+        isPublished !== undefined ? isPublished : course.isPublished;
 
-      const updatedCourse = await course.save();
-      res.json(updatedCourse);
+      await course.save();
+      const populated = await Course.findById(course._id).populate("categories");
+      res.json(populated);
     } else {
       res.status(404).json({ message: "Course not found" });
     }
@@ -95,7 +118,6 @@ export const updateCourse = async (req, res) => {
     res.status(400).json({ message: "Invalid course data", error: error.message });
   }
 };
-
 
 export const deleteCourse = async (req, res) => {
   try {

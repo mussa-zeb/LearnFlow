@@ -96,6 +96,24 @@ export const roadmapsApi = {
     }),
 };
 
+export const categoriesApi = {
+  getAll: () => api.get("/categories"),
+  getPopular: () => api.get("/categories/popular"),
+  getById: (id) => api.get(`/categories/${id}`),
+  create: (data, token) =>
+    api.post("/categories", data, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  update: (id, data, token) =>
+    api.put(`/categories/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  delete: (id, token) =>
+    api.delete(`/categories/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+};
+
 export const adminApi = {
   login: (credentials) =>
     api.post("/admin/login", credentials),

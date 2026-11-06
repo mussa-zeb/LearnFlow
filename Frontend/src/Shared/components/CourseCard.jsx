@@ -4,6 +4,7 @@ import { resolveMediaUrl } from "../utils/api";
 
 const CourseCard = ({ course }) => {
   const thumb = resolveMediaUrl(course.thumbnail);
+  const categories = course.categories || [];
 
   return (
     <Link
@@ -24,8 +25,22 @@ const CourseCard = ({ course }) => {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/0 group-hover:from-black/5 group-hover:to-transparent transition-all duration-300" />
-        <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-neutral-700 shadow-sm backdrop-blur-sm ring-1 ring-black/5">
-          {course.category}
+
+        {/* Categories */}
+        <span className="absolute left-3 top-3 flex flex-wrap gap-1">
+          {categories.slice(0, 2).map((c) => (
+            <span
+              key={c._id || c}
+              className="inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-neutral-700 shadow-sm backdrop-blur-sm ring-1 ring-black/5"
+            >
+              {c.name || "Uncategorized"}
+            </span>
+          ))}
+          {categories.length > 2 && (
+            <span className="inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-neutral-700 shadow-sm backdrop-blur-sm ring-1 ring-black/5">
+              +{categories.length - 2}
+            </span>
+          )}
         </span>
       </div>
 

@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { coursesApi, roadmapsApi, resolveMediaUrl } from "../../Shared/utils/api";
+import {
+  coursesApi,
+  roadmapsApi,
+  resolveMediaUrl,
+} from "../../Shared/utils/api";
 import VideoPlayer from "../../Shared/components/VideoPlayer";
-import { Clock, BookOpen, ArrowRight, ArrowLeft, Play, CheckCircle, ListVideo, Map } from "lucide-react";
+import {
+  Clock,
+  BookOpen,
+  ArrowRight,
+  ArrowLeft,
+  Play,
+  CheckCircle,
+  ListVideo,
+  Map,
+} from "lucide-react";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -20,12 +33,11 @@ const CourseDetail = () => {
 
         // Fetch roadmaps to see if one is assigned to this course
         const { data: roadmapsData } = await roadmapsApi.getAll();
-        const assignedRoadmap = roadmapsData.find(rm => rm.courseId === id);
+        const assignedRoadmap = roadmapsData.find((rm) => rm.courseId === id);
         if (assignedRoadmap) {
           setCourseRoadmap(assignedRoadmap);
         }
-
-      } catch (error) {
+      } catch (err) {
         setError("Course not found");
       } finally {
         setLoading(false);
@@ -34,18 +46,26 @@ const CourseDetail = () => {
     fetchData();
   }, [id]);
 
-  if (loading) return <div className="p-12 text-center text-neutral-500">Loading...</div>;
-  if (error || !course) return <div className="p-12 text-center text-neutral-500">Course not found.</div>;
+  if (loading)
+    return <div className="p-12 text-center text-neutral-500">Loading...</div>;
+  if (error || !course)
+    return (
+      <div className="p-12 text-center text-neutral-500">Course not found.</div>
+    );
 
   const previewUrl = resolveMediaUrl(course.previewVideoUrl);
   const thumbUrl = resolveMediaUrl(course.thumbnail);
   const lessons = course.lessons || [];
+  const categories = course.categories || [];
 
   return (
     <>
       <div className="w-full bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <Link to="/courses" className="inline-flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-900 mb-6">
+          <Link
+            to="/courses"
+            className="inline-flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-900 mb-6"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to courses
           </Link>
 
@@ -53,9 +73,17 @@ const CourseDetail = () => {
             <div className="lg:col-span-3 space-y-6">
               <div className="overflow-hidden rounded-2xl border border-neutral-100 bg-black shadow-sm aspect-video">
                 {previewUrl ? (
-                  <VideoPlayer src={previewUrl} title={course.title} className="h-full w-full" />
+                  <VideoPlayer
+                    src={previewUrl}
+                    title={course.title}
+                    className="h-full w-full"
+                  />
                 ) : thumbUrl ? (
-                  <img src={thumbUrl} alt={course.title} className="h-full w-full object-cover" />
+                  <img
+                    src={thumbUrl}
+                    alt={course.title}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-neutral-50">
                     <Play className="h-14 w-14 text-neutral-300" />
@@ -64,11 +92,37 @@ const CourseDetail = () => {
               </div>
 
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-neutral-900 mb-4">{course.title}</h1>
-                <p className="text-base sm:text-lg text-neutral-600 leading-relaxed mb-6">{course.description}</p>
-                <div className="flex items-center gap-4 text-neutral-600">
-                  <div className="flex items-center gap-1.5"><Clock className="h-4 w-4" /><span className="text-sm font-medium">{course.duration}</span></div>
-                  <div className="flex items-center gap-1.5"><BookOpen className="h-4 w-4" /><span className="text-sm font-medium">{course.category}</span></div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-neutral-900 mb-4">
+                  {course.title}
+                </h1>
+                <p className="text-base sm:text-lg text-neutral-600 leading-relaxed mb-6">
+                  {course.description}
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-neutral-600">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {course.duration}
+                    </span>
+                  </div>
+                  {categories.length > 0 ? (
+                    categories.map((c) => (
+                      <div
+                        key={c._id || c}
+                        className="flex items-center gap-1.5"
+                      >
+                        <BookOpen className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {c.name || "Uncategorized"}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <BookOpen className="h-4 w-4" />
+                      <span className="text-sm font-medium">Uncategorized</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -76,26 +130,39 @@ const CourseDetail = () => {
             <div className="lg:col-span-2">
               <div className="sticky top-20 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-sm">
                 <div className="p-6 space-y-4">
-                  <h3 className="text-lg font-medium text-neutral-900">This course includes:</h3>
+                  <h3 className="text-lg font-medium text-neutral-900">
+                    This course includes:
+                  </h3>
                   <ul className="space-y-3 text-sm text-neutral-600">
-                    <li className="flex items-center gap-2"><ListVideo className="h-4 w-4" /> {lessons.length || 1} on-demand video{lessons.length !== 1 ? 's' : ''}</li>
-                    <li className="flex items-center gap-2"><Clock className="h-4 w-4" /> {course.duration} of content</li>
-                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Full lifetime access</li>
+                    <li className="flex items-center gap-2">
+                      <ListVideo className="h-4 w-4" /> {lessons.length || 1}{" "}
+                      on-demand video{lessons.length !== 1 ? "s" : ""}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" /> {course.duration} of content
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" /> Full lifetime access
+                    </li>
                   </ul>
-                  
+
                   <div className="pt-4 flex flex-col gap-3">
-                    <Link to={`/learn/${course._id}`} className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-neutral-800">
-                      Start learning <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    <Link
+                      to={`/learn/${course._id}`}
+                      className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"
+                    >
+                      Start learning{" "}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                     </Link>
 
-                    {/* Show Roadmap Button if assigned to this course */}
                     {courseRoadmap && (
-                      <Link 
-    to={`/roadmap/${courseRoadmap._id}`}  // 👈 Ensure it goes to the page, not the file
-    className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-neutral-200 px-5 py-3 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50 transition-colors"
-  >
-    <Map className="h-4 w-4 text-neutral-600" /> View Learning Roadmap
-  </Link>
+                      <Link
+                        to={`/roadmap/${courseRoadmap._id}`}
+                        className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-neutral-200 px-5 py-3 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50 transition-colors"
+                      >
+                        <Map className="h-4 w-4 text-neutral-600" /> View
+                        Learning Roadmap
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -107,11 +174,14 @@ const CourseDetail = () => {
 
       <div className="w-full bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">About this course</h2>
-              <div className="prose prose-neutral max-w-none text-neutral-700 leading-relaxed whitespace-pre-wrap">{course.content}</div>
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                About this course
+              </h2>
+              <div className="prose prose-neutral max-w-none text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                {course.content}
+              </div>
             </div>
           </div>
 
@@ -121,8 +191,8 @@ const CourseDetail = () => {
             <div className="rounded-2xl border border-neutral-100 bg-white overflow-hidden shadow-sm">
               {lessons.length > 0 ? (
                 lessons.map((lesson, idx) => (
-                  <Link 
-                    key={idx} 
+                  <Link
+                    key={idx}
                     to={`/learn/${course._id}?lesson=${idx}`}
                     className="flex items-center gap-3 p-4 border-b border-neutral-50 last:border-0 hover:bg-neutral-50 transition-colors group cursor-pointer"
                   >
@@ -130,17 +200,20 @@ const CourseDetail = () => {
                       {idx + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-neutral-900 group-hover:text-black">{lesson.title}</p>
+                      <p className="text-sm font-medium text-neutral-900 group-hover:text-black">
+                        {lesson.title}
+                      </p>
                     </div>
                     <Play className="h-4 w-4 text-neutral-400 group-hover:text-neutral-900 transition-colors" />
                   </Link>
                 ))
               ) : (
-                <div className="p-4 text-sm text-neutral-500">Course content available upon enrollment.</div>
+                <div className="p-4 text-sm text-neutral-500">
+                  Course content available upon enrollment.
+                </div>
               )}
             </div>
           </div>
-
         </div>
       </div>
     </>

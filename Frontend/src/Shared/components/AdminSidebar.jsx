@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import {
-  LayoutDashboard, BookOpen, PlusCircle, LogOut, ArrowLeft, X, Map,
+  LayoutDashboard, BookOpen, PlusCircle, LogOut, ArrowLeft, X, Map, Tag,
 } from "lucide-react";
 
 const AdminSidebar = ({ mobileOpen, onClose }) => {
@@ -13,6 +13,7 @@ const AdminSidebar = ({ mobileOpen, onClose }) => {
     { name: "Manage Courses", path: "/admin/courses", icon: BookOpen },
     { name: "Add Course", path: "/admin/courses/new", icon: PlusCircle },
     { name: "Manage Roadmaps", path: "/admin/roadmaps", icon: Map },
+    { name: "Manage Categories", path: "/admin/categories", icon: Tag },
   ];
 
   const inner = (
